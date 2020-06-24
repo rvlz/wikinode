@@ -25,7 +25,7 @@ dev-env: venv requirements/dev.txt # create dev environment
 	venv/bin/pip-sync requirements/dev.txt
 
 test:
-	pytest
+	python -m pytest
 
 test-all:
 	tox
