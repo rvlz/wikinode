@@ -42,6 +42,7 @@ Get a single summary
 >>> wikinode.fetch("hello world")
 {
   'query': 'hello world',
+  'title': '"Hello, World!" program',
   'description': "Traditional beginners' computer program",
   'extract': 'A "Hello, World!" program generally is a computer program...'
 }
@@ -56,11 +57,13 @@ Get multiple summaries
 [
   {
     'query': 'hello world',
+    'title': '"Hello, World!" program',
     'description': "Traditional beginners' computer program",
     'extract': 'A "Hello, World!" program generally is a computer program...'
   },
   {
     'query': 'python language',
+    'title': 'Python (programming language)',
     'description': 'General-purpose, high-level programming language',
     'extract': 'Python is an interpreted, high-level, general-purpose...'
   }
@@ -74,10 +77,12 @@ Only get summary descriptions
 [
   {
     'query': 'hello world',
+    'title': '"Hello, World!" program',
     'description': "Traditional beginners' computer program"
   },
   {
     'query': 'python language',
+    'title': 'Python (programming language)',
     'description': 'General-purpose, high-level programming language'
   }
 ]
@@ -94,11 +99,13 @@ Get metadata for multiple summaries
   'results': [
     {
       'query': 'hello world',
+      'title': '"Hello, World!" program',
       'description': "Traditional beginners' computer program",
       'extract': 'A "Hello, World!" program generally is a computer program...'
     },
     {
       'query': 'python language',
+      'title': 'Python (programming language)',
       'description': 'General-purpose, high-level programming language',
       'extract': 'Python is an interpreted, high-level, general-purpose...'
     }
