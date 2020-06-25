@@ -56,3 +56,12 @@ prod.txt: requirements/prod.in # production dependencies
 
 docs.txt: requirements/docs.in # docs dependencies
 	venv/bin/pip-compile -o requirements/docs.txt requirements/docs.in
+
+dist: clean-build
+	python setup.py sdist bdist_wheel
+
+dist-check:
+	twine check dist/*
+
+release:
+	twine upload dist/*
