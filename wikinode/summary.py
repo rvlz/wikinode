@@ -10,10 +10,16 @@ from wikinode.exceptions import QueryAmbiguousError
 default_fields = ["title", "description", "extract"]
 
 
-def _select_subset(data, fields=default_fields, meta=None):
+def _send_query(query):
+    url = f"{API_URL}/{query}?redirect=true"
+    response = requests.get(url, headers={"User-Agent": USER_AGENT})
+    return response.json()
+
+
+def _select_subset(data, fields=default_fields, extra=None):
     subset = {k: data[k] for k in data if k in fields}
-    if meta is not None:
-        subset = {**subset, **meta}
+    if extra is not None:
+        subset = {**subset, **extra}
     return subset
 
 
@@ -50,14 +56,13 @@ def fetch(query, short=False):
           'description': "Traditional beginners' computer program"
         }
     """
-    response = requests.get(
-        f"{API_URL}/{query}?redirect=true", headers={"User-Agent": USER_AGENT},
-    )
-    if response.status_code == 404:
-        return {}
-    data = response.json()
-    if data.get("type") == "disambiguation":
+    data = _send_query(query)
+    payload_type = data.get("type")
+    summary = {}
+    if payload_type == "standard":
+        summary = _select_subset(data, extra={"query": query})
+        if short:
+            del summary["extract"]
+    elif payload_type == "disambiguation":
         raise QueryAmbiguousError(query)
-    fields = default_fields if not short else ["title", "description"]
-    summary = _select_subset(data, fields=fields, meta={"query": query})
     return summary
