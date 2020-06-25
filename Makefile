@@ -1,4 +1,4 @@
-.PHONY: test test-all clean-pyc docs
+.PHONY: test test-all clean clean-pyc clean-test docs
 
 define BROWSER_PYSCRIPT
 import os, webbrowser, sys
@@ -12,11 +12,21 @@ endef
 export BROWSER_PYSCRIPT
 BROWSER := python -c "$$BROWSER_PYSCRIPT"
 
+clean: clean-pyc clean-build clean-test
+
 clean-pyc: # remove python file artifacts
 	find . -name '*.pyc' -exec rm -f {} +
 	find . -name '*.pyo' -exec rm -f {} +
 	find . -name '*~' -exec rm -f {} +
 	find . -name '__pycache__' -exec rm -fr {} +
+
+clean-build: ## remove build artifacts
+	rm -fr build/
+	rm -fr dist/
+	rm -fr .eggs/
+
+clean-test: ## remove test artifacts
+	rm -fr .tox/
 
 build-env: venv requirements/prod.txt # sync virtual environment
 	venv/bin/pip-sync requirements/prod.txt
