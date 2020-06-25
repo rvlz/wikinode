@@ -6,3 +6,4 @@ pre-commit
 tox
 bumpversion
 twine
+wheel
