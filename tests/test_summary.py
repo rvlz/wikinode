@@ -8,6 +8,10 @@ from tests.fixtures import (
     body_not_found,
     body_ambiguous,
     body_redirect,
+    fetch_results,
+    fetch_results_ambiguous,
+    fetch_results_not_found,
+    fetch_results_mixed,
 )
 
 
@@ -105,3 +109,98 @@ def test_fetch_remove_extract_field(response):
     assert result["query"] == '"Hello, World!" program'
     assert result["title"] == body["title"]
     assert result["description"] == body["description"]
+
+
+def test_fetch_many(mocker):
+    """Test function can fetch multiple summaries."""
+    fetch_mock = mocker.patch("wikinode.summary.fetch")
+    fetch_mock.side_effect = fetch_results
+    queries = ["hello world", "python language", "Chicago"]
+    results = summary.fetch_many(queries)
+    # fetch assertions
+    assert fetch_mock.call_count == 3
+    fetch_mock.assert_any_call("hello world", short=False)
+    fetch_mock.assert_any_call("python language", short=False)
+    fetch_mock.assert_any_call("Chicago", short=False)
+    # results
+    assert results == fetch_results
+
+
+def test_fetch_many_ambiguous_error(mocker):
+    """
+    Test function excludes queries that raise QueryAmbiguousError.
+    """
+    fetch_mock = mocker.patch("wikinode.summary.fetch")
+    fetch_mock.side_effect = fetch_results_ambiguous
+    # "micro" raises QueryAmbiguousError exception
+    queries = ["hello world", "python language", "micro"]
+    results = summary.fetch_many(queries)
+    # fetch assertions
+    assert fetch_mock.call_count == 3
+    fetch_mock.assert_any_call("hello world", short=False)
+    fetch_mock.assert_any_call("python language", short=False)
+    fetch_mock.assert_any_call("micro", short=False)
+    # results
+    assert results == fetch_results_ambiguous[:-1]
+
+
+def test_fetch_many_summary_not_found(mocker):
+    """
+    Test function excludes queries that weren't successful.
+    """
+    fetch_mock = mocker.patch("wikinode.summary.fetch")
+    fetch_mock.side_effect = fetch_results_not_found
+    # "hello123" fails
+    queries = ["hello world", "python language", "hello123"]
+    results = summary.fetch_many(queries)
+    # fetch assertions
+    assert fetch_mock.call_count == 3
+    fetch_mock.assert_any_call("hello world", short=False)
+    fetch_mock.assert_any_call("python language", short=False)
+    fetch_mock.assert_any_call("hello123", short=False)
+    # results
+    assert results == fetch_results_not_found[:-1]
+
+
+def test_fetch_many_remove_extract_field(mocker):
+    """
+    Test function excludes 'extract' fields from results.
+    """
+    fetch_mock = mocker.patch("wikinode.summary.fetch")
+    queries = ["hello world", "python language", "Chicago"]
+    summary.fetch_many(queries, short=True)
+    # fetch assertions
+    assert fetch_mock.call_count == 3
+    fetch_mock.assert_any_call("hello world", short=True)
+    fetch_mock.assert_any_call("python language", short=True)
+    fetch_mock.assert_any_call("Chicago", short=True)
+
+
+def test_fetch_many_with_meta_data(mocker):
+    """
+    Test function adds metadata about results.
+    """
+    fetch_mock = mocker.patch("wikinode.summary.fetch")
+    fetch_mock.side_effect = fetch_results_mixed
+    queries = [
+        "hello world",
+        "micro",
+        "python language",
+        "hello123",
+        "Chicago",
+    ]
+    results = summary.fetch_many(queries, meta=True)
+    assert fetch_mock.call_count == 5
+    fetch_mock.assert_any_call("hello world", short=False)
+    fetch_mock.assert_any_call("micro", short=False)
+    fetch_mock.assert_any_call("python language", short=False)
+    fetch_mock.assert_any_call("hello123", short=False)
+    fetch_mock.assert_any_call("Chicago", short=False)
+    assert results["hits"] == 3
+    assert results["not_found"] == ["hello123"]
+    assert results["ambiguous"] == ["micro"]
+    assert results["results"] == [
+        fetch_results_mixed[0],  # hello world
+        fetch_results_mixed[2],  # python language
+        fetch_results_mixed[4],  # Chicago
+    ]

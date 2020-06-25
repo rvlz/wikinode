@@ -125,3 +125,19 @@ def fetch_many(queries, short=False, meta=False):
           ]
         }
     """
+    meta_data = {"hits": 0, "not_found": [], "ambiguous": []}
+    results = []
+    for query in queries:
+        try:
+            result = fetch(query, short=short)
+        except QueryAmbiguousError:
+            meta_data["ambiguous"].append(query)
+            continue
+        if result == {}:
+            meta_data["not_found"].append(query)
+            continue
+        meta_data["hits"] += 1
+        results.append(result)
+    if meta:
+        results = {**meta_data, "results": results}
+    return results
