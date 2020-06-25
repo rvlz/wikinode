@@ -112,3 +112,7 @@ Get metadata for multiple summaries
   ]
 }
 ```
+
+## Documentation
+
+Read the docs at https://wikinode.readthedocs.io/en/latest/.
