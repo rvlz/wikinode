@@ -30,7 +30,7 @@ def fetch(query, short=False):
     Args:
         query (str): Search term to find an article summary.
         short (bool): Exclude *extract* field from returned result.
-            By default, the 'extract' is included.
+            By default, the 'extract' field is included.
 
     Returns:
         (dict): Result contains the fields *query*, *title*, *description*,
