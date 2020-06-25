@@ -3,5 +3,8 @@ Summaries
 
 Get article summaries from Wikipedia.
 
-.. automodule:: wikinode.summary
-   :members: fetch
+.. autofunction:: wikinode.summary.fetch
+
+|
+
+.. autofunction:: wikinode.summary.fetch_many

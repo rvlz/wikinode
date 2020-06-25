@@ -66,3 +66,62 @@ def fetch(query, short=False):
     elif payload_type == "disambiguation":
         raise QueryAmbiguousError(query)
     return summary
+
+
+def fetch_many(queries, short=False, meta=False):
+    """
+    Request multiple summaries.
+
+    Args:
+        queries (list): A list of strings, each representing a single query.
+        short (bool): Exclude the *extract* field from all successful results.
+            By default, the 'extract' field is included.
+        meta (bool): Include data about the batch of queries. The added keys
+            include *hits* (number of successful queries), *not_found* (queries
+            that have no corresponding article), and *ambiguous* (queries that
+            have more than one corresponding article). The *results* key has
+            the summary data.
+
+    Returns:
+        (list): Each result contains the fields *query*, *title*,
+        *description*, and *extract*, which can be omitted.
+
+    Example:
+
+        >>> wikinode.fetch_many(["hello world", "python language"])
+        [
+          {
+            'query': 'hello world',
+            'title': '"Hello, World!" program',
+            'description': "Traditional beginners' computer program",
+            'extract': 'A "Hello, World!" program generally is a computer...'
+          },
+          {
+            'query': 'python language',
+            'title': 'Python (programming language)',
+            'description': 'General-purpose, high-level programming language',
+            'extract': 'Python is an interpreted, high-level, general...'
+          }
+        ]
+        >>> queries = ["hello world", "python language", "123hello"]
+        >>> wikinode.fetch_many(queries, meta=True)
+        {
+          'hits': 2,
+          'not_found': ['123hello'],  # Couldn't find summary for "123hello"
+          'ambiguous': [],  # no ambiguous query
+          'results': [
+            {
+              'query': 'hello world',
+              'title': '"Hello, World!" program',
+              'description': "Traditional beginners' computer program",
+              'extract': 'A "Hello, World!" program generally is a computer...'
+            },
+            {
+              'query': 'python language',
+              'title': 'Python (programming language)',
+              'description': 'General-purpose, high-level programming...',
+              'extract': 'Python is an interpreted, high-level, general...'
+            }
+          ]
+        }
+    """
