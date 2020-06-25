@@ -6,3 +6,5 @@ exclude =
     build,
     dist,
     docs
+per-file-ignores =
+    wikinode/__init__.py:F401
