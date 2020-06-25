@@ -17,7 +17,7 @@ def _select_subset(data, fields=default_fields, meta=None):
     return subset
 
 
-def fetch(query):
+def fetch(query, short=False):
     response = requests.get(
         f"{API_URL}/{query}?redirect=true", headers={"User-Agent": USER_AGENT},
     )
@@ -26,5 +26,6 @@ def fetch(query):
     data = response.json()
     if data.get("type") == "disambiguation":
         raise QueryAmbiguousError(query)
-    summary = _select_subset(data, meta={"query": query})
+    fields = default_fields if not short else ["title", "description"]
+    summary = _select_subset(data, fields=fields, meta={"query": query})
     return summary

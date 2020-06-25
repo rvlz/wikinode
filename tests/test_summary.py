@@ -114,3 +114,18 @@ def test_fetch_permanent_redirects(responses):
     assert result["title"] == body["title"]
     assert result["description"] == body["description"]
     assert result["extract"] == body["extract"]
+
+
+@pytest.mark.parametrize("status_code,body", [(200, body)])
+def test_fetch_remove_extract_field(response):
+    """Test 'extract' field removal from result."""
+    result = summary.fetch('"Hello, World!" program', short=True)
+    # check HTTP request made correctly
+    assert len(response.calls) == 1
+    assert "redirect=true" in response.calls[0].request.url
+    assert response.calls[0].request.headers["User-Agent"] == USER_AGENT
+    # results
+    assert set(result.keys()) == set(["query", "title", "description"])
+    assert result["query"] == '"Hello, World!" program'
+    assert result["title"] == body["title"]
+    assert result["description"] == body["description"]
