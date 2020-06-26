@@ -204,3 +204,39 @@ def test_fetch_many_with_meta_data(mocker):
         fetch_results_mixed[2],  # python language
         fetch_results_mixed[4],  # Chicago
     ]
+
+
+@pytest.mark.parametrize(
+    "input",
+    [
+        2020,
+        ["hello world"],
+        {"query": "hello world"},
+        ("hello world", "Chicago"),
+    ],
+)
+def test_fetch_input(mocker, input):
+    """Test fetch raises exception when query is not a string."""
+    mocker.patch("wikinode.summary.requests.get")  # prevent HTTP real requests
+    with pytest.raises(ValueError) as exc:
+        summary.fetch(input)
+    assert "Invalid argument. Argument must have type 'str'." in str(exc.value)
+
+
+@pytest.mark.parametrize(
+    "input",
+    [
+        2020,
+        "hello world",
+        {"query": "hello world"},
+        ("hello world", "Chicago"),
+    ],
+)
+def test_fetch_many_input(mocker, input):
+    """Test fetch_many raises exception when query is not a list."""
+    mocker.patch("wikinode.summary.fetch")
+    with pytest.raises(ValueError) as exc:
+        summary.fetch_many(input)
+    assert "Invalid argument. Argument must have type 'list'." in str(
+        exc.value
+    )

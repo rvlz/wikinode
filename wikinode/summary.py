@@ -56,6 +56,8 @@ def fetch(query, short=False):
           'description': "Traditional beginners' computer program"
         }
     """
+    if not isinstance(query, str):
+        raise ValueError("Invalid argument. Argument must have type 'str'.")
     data = _send_query(query)
     payload_type = data.get("type")
     summary = {}
@@ -125,6 +127,8 @@ def fetch_many(queries, short=False, meta=False):
           ]
         }
     """
+    if not isinstance(queries, list):
+        raise ValueError("Invalid argument. Argument must have type 'list'.")
     meta_data = {"hits": 0, "not_found": [], "ambiguous": []}
     results = []
     for query in queries:
