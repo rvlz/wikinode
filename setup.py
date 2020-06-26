@@ -5,7 +5,7 @@ with open("README.md", encoding="UTF-8") as f:
 
 setup(
     name="wikinode",
-    version="0.1.0",
+    version="0.1.1",
     description=(
         "A Python library that helps you " "fetch data from Wikipedia."
     ),
