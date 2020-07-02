@@ -3,15 +3,13 @@ import re
 import pytest
 import responses as _responses
 
-from wikinode.requests import API_URL
-
 
 @pytest.fixture
-def response(status_code, body):
+def response(status_code, body, url):
     with _responses.RequestsMock() as rsps:
         rsps.add(
             _responses.GET,
-            re.compile(f"^{API_URL}"),
+            re.compile(f"^{url}"),
             json=body,
             status=status_code,
         )
@@ -21,10 +19,10 @@ def response(status_code, body):
 @pytest.fixture
 def responses(data):
     with _responses.RequestsMock() as rsps:
-        for status_code, body, headers in data:
+        for status_code, body, headers, url in data:
             rsps.add(
                 _responses.GET,
-                re.compile(f"^{API_URL}"),
+                re.compile(f"^{url}"),
                 json=body,
                 status=status_code,
                 headers=headers,

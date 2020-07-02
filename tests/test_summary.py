@@ -2,7 +2,7 @@ import pytest
 
 from wikinode import summary
 from wikinode.exceptions import QueryAmbiguousError
-from wikinode.requests import USER_AGENT
+from wikinode.requests import USER_AGENT, API_URL
 from tests.fixtures import (
     body,
     body_not_found,
@@ -15,7 +15,7 @@ from tests.fixtures import (
 )
 
 
-@pytest.mark.parametrize("status_code,body", [(200, body)])
+@pytest.mark.parametrize("status_code,body,url", [(200, body, API_URL)])
 def test_fetch(response):
     """Test function can fetch one summary."""
     result = summary.fetch('"Hello, World!" program')
@@ -33,7 +33,9 @@ def test_fetch(response):
     assert result["extract"] == body["extract"]
 
 
-@pytest.mark.parametrize("status_code,body", [(404, body_not_found)])
+@pytest.mark.parametrize(
+    "status_code,body,url", [(404, body_not_found, API_URL)]
+)
 def test_fetch_no_article_found(response):
     """Test function returns empty dictionary when summary not found."""
     result = summary.fetch("hello123")
@@ -45,7 +47,9 @@ def test_fetch_no_article_found(response):
     assert result == {}
 
 
-@pytest.mark.parametrize("status_code,body", [(200, body_ambiguous)])
+@pytest.mark.parametrize(
+    "status_code,body,url", [(200, body_ambiguous, API_URL)]
+)
 def test_fetch_query_ambiguous(response):
     """Test function raises exception when query is not specific enough."""
     with pytest.raises(QueryAmbiguousError) as exc:
@@ -59,7 +63,12 @@ def test_fetch_query_ambiguous(response):
 
 @pytest.mark.parametrize(
     "data",
-    [[(302, "", {"Location": "Saint_Petersburg"}), (200, body_redirect, {})]],
+    [
+        [
+            (302, "", {"Location": "Saint_Petersburg"}, API_URL),
+            (200, body_redirect, {}, API_URL),
+        ]
+    ],
 )
 def test_fetch_redirects(responses):
     """Test function can handle redirects."""
@@ -77,7 +86,13 @@ def test_fetch_redirects(responses):
 
 
 @pytest.mark.parametrize(
-    "data", [[(301, "", {"Location": "Hello_world"}), (200, body, {})]]
+    "data",
+    [
+        [
+            (301, "", {"Location": "Hello_world"}, API_URL),
+            (200, body, {}, API_URL),
+        ]
+    ],
 )
 def test_fetch_permanent_redirects(responses):
     """Test function can handle permanent redirects."""
@@ -96,7 +111,7 @@ def test_fetch_permanent_redirects(responses):
     assert result["extract"] == body["extract"]
 
 
-@pytest.mark.parametrize("status_code,body", [(200, body)])
+@pytest.mark.parametrize("status_code,body,url", [(200, body, API_URL)])
 def test_fetch_remove_extract_field(response):
     """Test 'extract' field removal from result."""
     result = summary.fetch('"Hello, World!" program', short=True)
