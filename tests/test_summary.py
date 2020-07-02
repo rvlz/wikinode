@@ -2,7 +2,7 @@ import pytest
 
 from wikinode import summary
 from wikinode.exceptions import QueryAmbiguousError
-from wikinode.requests import USER_AGENT, API_URL
+from wikinode.requests import USER_AGENT, API_URL, RANDOM_SUMMARY_URL
 from tests.fixtures import (
     body,
     body_not_found,
@@ -255,3 +255,47 @@ def test_fetch_many_input(mocker, input):
     assert "Invalid argument. Argument must have type 'list'." in str(
         exc.value
     )
+
+
+@pytest.mark.parametrize(
+    "status_code,body,url", [(200, body, RANDOM_SUMMARY_URL)]
+)
+def test_fetch_random(response):
+    """Test function can fetch random article."""
+    result = summary.fetch_random()
+    # check HTTP request made correctly
+    assert len(response.calls) == 1
+    assert response.calls[0].request.headers["User-Agent"] == USER_AGENT
+    # results
+    assert set(result.keys()) == set(["title", "description", "extract"])
+    assert result["title"] == body["title"]
+    assert result["description"] == body["description"]
+    assert result["extract"] == body["extract"]
+
+
+@pytest.mark.parametrize(
+    "status_code,body,url", [(404, body_not_found, RANDOM_SUMMARY_URL)]
+)
+def test_fetch_no_random_article_found(response):
+    """Test function returns empty dictionary when summary not found."""
+    result = summary.fetch_random()
+    # check HTTP request made correctly
+    assert len(response.calls) == 1
+    assert response.calls[0].request.headers["User-Agent"] == USER_AGENT
+    # results
+    assert result == {}
+
+
+@pytest.mark.parametrize(
+    "status_code,body,url", [(200, body, RANDOM_SUMMARY_URL)]
+)
+def test_fetch_random_remove_extract_field(response):
+    """Test 'extract' field removal from result."""
+    result = summary.fetch_random(short=True)
+    # check HTTP request made correctly
+    assert len(response.calls) == 1
+    assert response.calls[0].request.headers["User-Agent"] == USER_AGENT
+    # results
+    assert set(result.keys()) == set(["title", "description"])
+    assert result["title"] == body["title"]
+    assert result["description"] == body["description"]

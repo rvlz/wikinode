@@ -2,6 +2,7 @@ import requests
 
 from wikinode.requests import (
     API_URL,
+    RANDOM_SUMMARY_URL,
     USER_AGENT,
 )
 from wikinode.exceptions import QueryAmbiguousError
@@ -12,6 +13,11 @@ default_fields = ["title", "description", "extract"]
 
 def _send_query(query):
     url = f"{API_URL}/{query}?redirect=true"
+    response = requests.get(url, headers={"User-Agent": USER_AGENT})
+    return response.json()
+
+
+def _send_request(url):
     response = requests.get(url, headers={"User-Agent": USER_AGENT})
     return response.json()
 
@@ -145,3 +151,38 @@ def fetch_many(queries, short=False, meta=False):
     if meta:
         results = {**meta_data, "results": results}
     return results
+
+
+def fetch_random(short=False):
+    """
+    Request a random summary.
+
+    Args:
+        short (bool): Exclude *extract* field from returned result.
+            By default, the 'extract' field is included.
+    Returns:
+        (dict): Result contains the fields *title*, *description*,
+        and *extract*, which can be omitted.
+
+    Example:
+
+        >>> wikinode.fetch_random()
+        {
+          'title': '"Hello, World!" program',
+          'description': "Traditional beginners' computer program",
+          'extract': 'A "Hello, World!" program generally is a computer...'
+        }
+        >>> wikinode.fetch_random(short=True)
+        {
+          'title': '"Hello, World!" program',
+          'description': "Traditional beginners' computer program"
+        }
+    """
+    data = _send_request(RANDOM_SUMMARY_URL)
+    payload_type = data.get("type")
+    if payload_type == "standard":
+        summary = _select_subset(data)
+        if short:
+            del summary["extract"]
+        return summary
+    return {}
